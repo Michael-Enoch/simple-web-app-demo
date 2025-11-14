@@ -3,7 +3,6 @@ package com.example.simple_web_app.exception;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
 @Getter
 public class ProductNotFoundException extends RuntimeException{
     private final String code;
@@ -12,4 +11,8 @@ public class ProductNotFoundException extends RuntimeException{
         this.code = "PRODUCT_NOT_FOUND";
     }
 
+    public ProductNotFoundException(Long id, String code) {
+        super("Product with id " + id + " not found");
+        this.code = code;
+    }
 }
