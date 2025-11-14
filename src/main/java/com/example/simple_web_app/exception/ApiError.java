@@ -1,4 +1,12 @@
 package com.example.simple_web_app.exception;
 
-public record ApiError(int status, String message) {
+import java.time.LocalDateTime;
+
+public record ApiError(
+        LocalDateTime timestamp,
+        int status,
+        String error,
+        String message,
+        String path
+) {
 }
