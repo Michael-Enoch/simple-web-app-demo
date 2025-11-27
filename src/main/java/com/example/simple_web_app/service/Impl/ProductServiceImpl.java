@@ -1,5 +1,6 @@
 package com.example.simple_web_app.service.Impl;
 
+import com.example.simple_web_app.dto.PatchProductRequest;
 import com.example.simple_web_app.dto.ProductRequest;
 import com.example.simple_web_app.dto.ProductResponse;
 import com.example.simple_web_app.dto.UpdateProductRequest;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -41,11 +43,15 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductResponse createProduct(ProductRequest request) {
-        if (repo.existsByProdName(request.prodName())){
-            throw new DuplicateProductException(
-                    "A product with the name " + request.prodName() + " already exists"
-            );
-        }
+        // Validate prodName
+        Optional.ofNullable(request.prodName())
+                .filter(String::isBlank)
+                .ifPresent(name -> { throw new InvalidProductStateException("Product name cannot be blank"); });
+
+        Optional.ofNullable(request.prodName())
+                .filter(repo::existsByProdName)
+                .ifPresent(name -> { throw new DuplicateProductException("A product with this name already exists"); });
+
         validatePrice(request);
         Product product = mapper.toEntity(request);
         Product save = repo.save(product);
@@ -57,13 +63,14 @@ public class ProductServiceImpl implements ProductService {
         Product product = repo.findById(id).orElseThrow(()->
                 new ProductNotFoundException(id));
 
-        if (request.prodName() != null &&
-                repo.existsByProdName(request.prodName()) &&
-                !Objects.equals(product.getProdName(), request.prodName()))
-        {
+        // Validate prodName
+        Optional.ofNullable(request.prodName())
+                .filter(String::isBlank)
+                .ifPresent(name -> { throw new InvalidProductStateException("Product name cannot be blank"); });
 
-            throw new DuplicateProductException("A product with this name already exists");
-        }
+        Optional.ofNullable(request.prodName())
+                .filter(name -> !name.equals(product.getProdName()) && repo.existsByProdName(name))
+                .ifPresent(name -> { throw new DuplicateProductException("A product with this name already exists"); });
 
         validatePrice(request);
 
@@ -73,15 +80,49 @@ public class ProductServiceImpl implements ProductService {
         return mapper.toResponse(updated);
     }
 
+    @Override
+    public ProductResponse patchProduct(PatchProductRequest request, Long id) {
+        Product product = repo.findById(id)
+                .orElseThrow(() -> new ProductNotFoundException(id));
+
+        // Validate prodName: reject empty strings and duplicates
+        Optional.ofNullable(request.prodName())
+                .filter(String::isBlank)
+                .ifPresent(name -> { throw new InvalidProductStateException("Product name cannot be blank"); });
+
+        Optional.ofNullable(request.prodName())
+                .filter(name -> !name.equals(product.getProdName()) && repo.existsByProdName(name))
+                .ifPresent(name -> { throw new DuplicateProductException("A product with this name already exists"); });
+
+        // Validate description: reject empty strings
+        Optional.ofNullable(request.description())
+                .filter(String::isBlank)
+                .ifPresent(d -> { throw new InvalidProductStateException("Description cannot be blank"); });
+
+       validatePrice(request);
+
+        mapper.patchProductFromRequest(request, product);
+
+        Product updated = repo.save(product);
+
+        return mapper.toResponse(updated);
+    }
+
+    private void validatePrice(PatchProductRequest request) {
+        Optional.ofNullable(request.price())
+                .filter(p -> p <= 0)
+                .ifPresent(p -> { throw new InvalidProductStateException("Price must be greater than 0"); });
+    }
+
     private void validatePrice(ProductRequest request){
-        if (request.price() != null && request.price() <= 0) {
-            throw new InvalidProductStateException("Price must be greater than 0");
-        }
+        Optional.ofNullable(request.price())
+                .filter(p -> p <= 0)
+                .ifPresent(p -> { throw new InvalidProductStateException("Price must be greater than 0"); });
     }
 
     private void validatePrice(UpdateProductRequest request){
-        if (request.price() != null && request.price() <= 0) {
-            throw new InvalidProductStateException("Price must be greater than 0");
-        }
+        Optional.ofNullable(request.price())
+                .filter(p -> p <= 0)
+                .ifPresent(p -> { throw new InvalidProductStateException("Price must be greater than 0"); });
     }
 }
