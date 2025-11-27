@@ -25,6 +25,9 @@ public class Product {
     @Column(nullable = false)
     private Double price;
 
+    @Column(name = "description", nullable = false)
+    private String description;
+
     @CreationTimestamp
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;

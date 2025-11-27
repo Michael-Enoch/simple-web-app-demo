@@ -2,7 +2,9 @@ package com.example.simple_web_app.controller;
 
 import com.example.simple_web_app.dto.ProductRequest;
 import com.example.simple_web_app.dto.ProductResponse;
+import com.example.simple_web_app.dto.UpdateProductRequest;
 import com.example.simple_web_app.service.ProductService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +21,7 @@ public class ProductController {
     private final ProductService productService;
 
     @PostMapping
-    public ResponseEntity<ProductResponse> createProduct(@RequestBody ProductRequest request){
+    public ResponseEntity<ProductResponse> createProduct(@Valid @RequestBody ProductRequest request){
         ProductResponse response = productService.createProduct(request);
 
         URI location = ServletUriComponentsBuilder
@@ -40,6 +42,14 @@ public class ProductController {
     public ResponseEntity<List<ProductResponse>> getProducts() {
         List<ProductResponse> responses = productService.getProducts();
         return ResponseEntity.ok(responses);
+    }
+
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody UpdateProductRequest request){
+        ProductResponse response = productService.updateProduct(request, id);
+        return ResponseEntity.ok(response);
+
     }
 
 }

@@ -5,6 +5,6 @@ import lombok.Builder;
 import java.time.LocalDateTime;
 
 @Builder
-public record ProductResponse(Long id, String prodName, Double price,
+public record ProductResponse(Long id, String prodName, Double price, String description,
                               LocalDateTime createdAt, LocalDateTime updatedAt) {
 }
