@@ -1,8 +1,9 @@
 package com.example.simple_web_app.exception.business;
 
 import com.example.simple_web_app.exception.BadRequestException;
+import com.example.simple_web_app.exception.InternalServerErrorException;
 
-public class DuplicateProductException extends BadRequestException {
+public class DuplicateProductException extends InternalServerErrorException {
     private final String code;
     public DuplicateProductException(String message) {
         super(message);
