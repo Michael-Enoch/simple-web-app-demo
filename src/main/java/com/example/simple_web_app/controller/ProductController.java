@@ -1,5 +1,6 @@
 package com.example.simple_web_app.controller;
 
+import com.example.simple_web_app.dto.PatchProductRequest;
 import com.example.simple_web_app.dto.ProductRequest;
 import com.example.simple_web_app.dto.ProductResponse;
 import com.example.simple_web_app.dto.UpdateProductRequest;
@@ -48,6 +49,13 @@ public class ProductController {
     @PutMapping("/{id}")
     public ResponseEntity<ProductResponse> updateProduct(@PathVariable Long id, @Valid @RequestBody UpdateProductRequest request){
         ProductResponse response = productService.updateProduct(request, id);
+        return ResponseEntity.ok(response);
+
+    }
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<ProductResponse> patchProduct(@PathVariable Long id, @Valid @RequestBody PatchProductRequest request){
+        ProductResponse response = productService.patchProduct(request, id);
         return ResponseEntity.ok(response);
 
     }
